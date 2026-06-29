@@ -135,10 +135,11 @@
             font-size: 16px;
         }
 
+        /* استایل دکمه‌ها */
         .btn {
             font-family: 'Vazirmatn', sans-serif;
             display: inline-block;
-            background-color: #a38235; /* طلایی مات، پخته و تیره‌تر */
+            background-color: #a38235;
             color: #000000; 
             text-decoration: none;
             padding: 16px 35px;
@@ -146,12 +147,11 @@
             font-weight: bold;
             font-size: 17px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(163, 130, 53, 0.3); /* سایه هماهنگ و ملایم‌تر */
+            box-shadow: 0 4px 15px rgba(163, 130, 53, 0.3);
             position: relative;
             overflow: hidden;
         }
 
-        /* طراحی هاله نوری (Shine Effect) */
         .btn::after {
             content: '';
             position: absolute;
@@ -160,20 +160,27 @@
             width: 50%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-            transform: skewX(-25deg); /* کج کردن هاله نوری برای حالت داینامیک‌تر */
+            transform: skewX(-25deg);
             transition: left 0.6s ease-in-out;
         }
 
-        /* تغییرات در زمان قرار گرفتن موس روی دکمه (Hover) */
         .btn:hover {
-            background-color: #ba994c; /* در حالت هاور کمی روشن‌تر می‌شود اما جیغ نمی‌شود */
+            background-color: #ba994c;
             box-shadow: 0 6px 20px rgba(163, 130, 53, 0.6); 
             transform: translateY(-2px);
         }
 
-        /* حرکت هاله نوری هنگام هاور */
         .btn:hover::after {
             left: 150%;
+        }
+
+        /* چیدمان ریسپانسیو برای گروه دکمه‌ها */
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
         }
 
         /* بخش وضعیت زنده سرورها (شبیه‌سازی) */
@@ -216,6 +223,15 @@
             p { font-size: 14px; }
             .features { gap: 10px; }
             .badge { padding: 8px 14px; font-size: 12px; }
+            
+            .btn-group {
+                flex-direction: column;
+                padding: 0 15px;
+            }
+            .btn {
+                width: auto;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -256,7 +272,10 @@
             <div class="badge"><span class="badge-icon">🇮🇷</span> تانل هوشمند</div>
         </div>
 
-        <a href="https://t.me/TweakVaultVPN" class="btn" target="_blank">ورود به کانال رسمی تلگرام</a>
+        <div class="btn-group">
+            <a href="https://t.me/TweakVaultVPN" class="btn" target="_blank">ورود به کانال تلگرام</a>
+            <a href="https://x.com/TweakVault" class="btn" target="_blank">صفحه رسمی توییتر (X)</a>
+        </div>
 
         <div class="status-panel">
             <div class="status-item"><div class="dot"></div> وضعیت شبکه: پایدار</div>
