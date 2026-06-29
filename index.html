@@ -239,7 +239,7 @@
             flex-wrap: wrap;
         }
 
-        /* ساختار جدید باکس وضعیت زنده و نمودار سیگنال */
+        /* باکس وضعیت زنده و نمودار سیگنال */
         .status-panel {
             margin-top: 30px;
             border-top: 1px solid #30363d;
@@ -400,46 +400,52 @@
     </div>
 
     <script>
-        // --- 1. سیستم آمار بازدید (Simulated Analytics) ---
+        // --- 1. سیستم آمار بازدید (Time-Based & Synchronized) ---
         function initStats() {
-            // مقادیر اولیه پایه در صورتی که کاربر اولین بار است سایت را باز می‌کند
-            let total = parseInt(localStorage.getItem('tv_stat_total')) || 248;
-            let monthly = parseInt(localStorage.getItem('tv_stat_monthly')) || 83;
-            let daily = parseInt(localStorage.getItem('tv_stat_daily')) || 12;
-            let lastVisit = localStorage.getItem('tv_stat_last_visit');
+            // یک تاریخ شروع فرضی برای سایت تعیین می‌کنیم
+            const launchDate = new Date("2026-06-25T00:00:00").getTime();
+            const now = new Date();
+            const nowTime = now.getTime();
+            
+            // محاسبه زمان‌های سپری شده از لحظه شروع
+            const diffTime = Math.max(0, nowTime - launchDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+            
+            // ساخت اعداد پایه که روی همه مرورگرهای دنیا در این لحظه دقیقا یکسان است
+            const baseTotal = 240 + (diffHours * 3); 
+            const baseMonthly = 80 + (diffDays * 45);
+            
+            // محاسبه بازدید امروز (از ساعت ۱۲ شب به بعد)
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const hoursToday = Math.floor((nowTime - startOfDay) / (1000 * 60 * 60));
+            const minutesToday = Math.floor((nowTime - startOfDay) / (1000 * 60)); 
+            const baseDaily = 12 + Math.floor(minutesToday / 15); // هر 15 دقیقه یه بازدید به پایه اضافه میشه
 
-            let now = new Date();
-            let todayStr = now.toISOString().split('T')[0]; // قالب: YYYY-MM-DD
-            let currentMonthStr = todayStr.substring(0, 7);
-
-            if (lastVisit !== todayStr) {
-                // شبیه‌سازی تغییر روز و ورود کاربران جدید به صورت رندوم
-                let randomDailyGrowth = Math.floor(Math.random() * (35 - 12 + 1)) + 12; 
-                total += randomDailyGrowth;
-                monthly += randomDailyGrowth;
-
-                daily = Math.floor(Math.random() * 5) + 1; // شروع روز با ۱ تا ۵ بازدید رندوم
-
-                if (lastVisit && lastVisit.substring(0, 7) !== currentMonthStr) {
-                    monthly = daily; // ریست شدن آمار ماهانه
-                }
+            // گرفتن رفرش‌های محلیِ همین کاربر 
+            let localRefreshes = parseInt(localStorage.getItem('tv_local_refreshes')) || 0;
+            let lastVisitDate = localStorage.getItem('tv_last_visit_date');
+            let todayStr = now.toISOString().split('T')[0];
+            
+            // اگر روز تغییر کرد، رفرش‌های محلی کاربر صفر میشه
+            if (lastVisitDate !== todayStr) {
+                localRefreshes = 1; 
             } else {
-                // اگر همان روز است و رفرش کرده، ۱ عدد به همه آمارها اضافه کن
-                total += 1;
-                monthly += 1;
-                daily += 1;
+                localRefreshes += 1; 
             }
+            
+            localStorage.setItem('tv_local_refreshes', localRefreshes);
+            localStorage.setItem('tv_last_visit_date', todayStr);
 
-            // ذخیره مقادیر جدید
-            localStorage.setItem('tv_stat_total', total);
-            localStorage.setItem('tv_stat_monthly', monthly);
-            localStorage.setItem('tv_stat_daily', daily);
-            localStorage.setItem('tv_stat_last_visit', todayStr);
+            // ترکیب عدد پایه جهانی + رفرش‌های محلی کاربر
+            const finalTotal = baseTotal + localRefreshes;
+            const finalMonthly = baseMonthly + localRefreshes;
+            const finalDaily = baseDaily + localRefreshes;
 
             // نمایش در سایت
-            document.getElementById('stat-total').innerText = total.toLocaleString('en-US');
-            document.getElementById('stat-monthly').innerText = monthly.toLocaleString('en-US');
-            document.getElementById('stat-daily').innerText = daily.toLocaleString('en-US');
+            document.getElementById('stat-total').innerText = finalTotal.toLocaleString('en-US');
+            document.getElementById('stat-monthly').innerText = finalMonthly.toLocaleString('en-US');
+            document.getElementById('stat-daily').innerText = finalDaily.toLocaleString('en-US');
         }
 
         initStats();
