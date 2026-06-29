@@ -45,7 +45,7 @@
 
         .container {
             max-width: 750px;
-            padding: 50px 30px;
+            padding: 30px;
             background: rgba(13, 17, 23, 0.9);
             border: 1px solid #30363d;
             border-radius: 12px;
@@ -63,6 +63,39 @@
             height: 4px;
             background: linear-gradient(90deg, transparent, var(--main-accent), transparent);
             filter: blur(2px);
+        }
+
+        /* استایل بخش آمار بازدید */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #30363d;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted-text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: monospace, Tahoma, sans-serif;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--main-accent);
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
+            direction: ltr;
         }
 
         .logo-box {
@@ -219,7 +252,6 @@
             min-height: 50px;
         }
 
-        /* بوم نقاشی سیگنال (Canvas) */
         #cpr-canvas {
             position: absolute;
             bottom: 0;
@@ -227,22 +259,19 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            opacity: 0.3; /* کم‌رنگ بودن نمودار برای عدم تداخل با متن */
-            /* افکت محو شدن لبه‌های نمودار */
+            opacity: 0.3;
             -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
             mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
         }
 
-        /* کانتینر متن‌های وضعیت */
         .status-content {
             position: relative;
-            z-index: 2; /* قرار گرفتن روی نمودار */
+            z-index: 2;
             display: flex;
             justify-content: center;
             gap: 20px;
             width: 100%;
             flex-wrap: wrap;
-            /* بک‌گراند تیره بسیار ملایم پشت متن‌ها برای خوانایی بیشتر */
             background: rgba(13, 17, 23, 0.4); 
             padding: 8px 15px;
             border-radius: 8px;
@@ -254,7 +283,7 @@
             gap: 6px;
             font-size: 13px;
             font-weight: bold;
-            color: #ffffff; /* پررنگ و سفید شدن متن‌ها */
+            color: #ffffff;
             text-shadow: 0 0 5px rgba(0,0,0,0.8);
         }
 
@@ -275,6 +304,7 @@
 
         @media (max-width: 600px) {
             .container { padding: 30px 15px; border-radius: 0; border: none; width: 100%; }
+            .stats-bar { gap: 20px; }
             h1 { font-size: 22px; }
             p { font-size: 14px; }
             .features { gap: 10px; }
@@ -305,6 +335,22 @@
     </svg>
 
     <div class="container">
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">امروز</span>
+                <span class="stat-value" id="stat-daily">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">این ماه</span>
+                <span class="stat-value" id="stat-monthly">--</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">کل بازدید</span>
+                <span class="stat-value" id="stat-total">--</span>
+            </div>
+        </div>
+
         <div class="logo-box">
             <img src="logo.jpg" alt="TweakVault Logo" class="logo">
         </div>
@@ -354,7 +400,51 @@
     </div>
 
     <script>
-        // ۱. منطق تولید پینگ زنده
+        // --- 1. سیستم آمار بازدید (Simulated Analytics) ---
+        function initStats() {
+            // مقادیر اولیه پایه در صورتی که کاربر اولین بار است سایت را باز می‌کند
+            let total = parseInt(localStorage.getItem('tv_stat_total')) || 248;
+            let monthly = parseInt(localStorage.getItem('tv_stat_monthly')) || 83;
+            let daily = parseInt(localStorage.getItem('tv_stat_daily')) || 12;
+            let lastVisit = localStorage.getItem('tv_stat_last_visit');
+
+            let now = new Date();
+            let todayStr = now.toISOString().split('T')[0]; // قالب: YYYY-MM-DD
+            let currentMonthStr = todayStr.substring(0, 7);
+
+            if (lastVisit !== todayStr) {
+                // شبیه‌سازی تغییر روز و ورود کاربران جدید به صورت رندوم
+                let randomDailyGrowth = Math.floor(Math.random() * (35 - 12 + 1)) + 12; 
+                total += randomDailyGrowth;
+                monthly += randomDailyGrowth;
+
+                daily = Math.floor(Math.random() * 5) + 1; // شروع روز با ۱ تا ۵ بازدید رندوم
+
+                if (lastVisit && lastVisit.substring(0, 7) !== currentMonthStr) {
+                    monthly = daily; // ریست شدن آمار ماهانه
+                }
+            } else {
+                // اگر همان روز است و رفرش کرده، ۱ عدد به همه آمارها اضافه کن
+                total += 1;
+                monthly += 1;
+                daily += 1;
+            }
+
+            // ذخیره مقادیر جدید
+            localStorage.setItem('tv_stat_total', total);
+            localStorage.setItem('tv_stat_monthly', monthly);
+            localStorage.setItem('tv_stat_daily', daily);
+            localStorage.setItem('tv_stat_last_visit', todayStr);
+
+            // نمایش در سایت
+            document.getElementById('stat-total').innerText = total.toLocaleString('en-US');
+            document.getElementById('stat-monthly').innerText = monthly.toLocaleString('en-US');
+            document.getElementById('stat-daily').innerText = daily.toLocaleString('en-US');
+        }
+
+        initStats();
+
+        // --- 2. منطق تولید پینگ زنده ---
         function getRandomPing(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -370,7 +460,7 @@
         updatePings();
         setInterval(updatePings, 1500);
 
-        // ۲. منطق نمودار سیگنال شبکه (Network Heartbeat)
+        // --- 3. منطق نمودار سیگنال شبکه (Network Heartbeat) ---
         const canvas = document.getElementById('cpr-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -382,13 +472,10 @@
             canvas.height = canvas.offsetHeight;
             width = canvas.width;
             height = canvas.height;
-            // پر کردن آرایه اولیه برای نقاط نمودار
             points = new Array(Math.floor(width / 4)).fill(height / 1.5);
         }
         
         window.addEventListener('resize', resizeCanvas);
-        
-        // اطمینان از مقداردهی صحیح ابعاد پس از لود شدن کامل CSS
         setTimeout(resizeCanvas, 100);
 
         function drawHeartbeat() {
@@ -397,35 +484,29 @@
             ctx.moveTo(0, points[0]);
             
             for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(i * 4, points[i]); // فاصله بین نقاط روی محور X
+                ctx.lineTo(i * 4, points[i]);
             }
             
-            // استایل خط سیگنال
-            ctx.strokeStyle = '#58a6ff'; // رنگ آبی سایبری
+            ctx.strokeStyle = '#58a6ff';
             ctx.lineWidth = 1.5;
             ctx.stroke();
             
-            // افکت درخشش (Glow)
             ctx.shadowBlur = 8;
             ctx.shadowColor = '#58a6ff';
 
-            points.shift(); // حذف نقطه قدیمی از سمت چپ
+            points.shift(); 
             
-            // تولید سیگنال جدید
             tick++;
             let baseline = height / 1.5;
             let newPoint = baseline;
             
-            // ایجاد پالس‌های ناگهانی (مشابه ضربان قلب/ترافیک شبکه)
             if (tick % 80 > 70) {
                 newPoint = baseline + (Math.random() - 0.5) * (height * 0.9);
             } else {
-                // نویزِ ریزِ خط پایه
                 newPoint = baseline + (Math.random() - 0.5) * 4;
             }
             
-            points.push(newPoint); // اضافه کردن نقطه جدید به سمت راست
-
+            points.push(newPoint); 
             requestAnimationFrame(drawHeartbeat);
         }
 
