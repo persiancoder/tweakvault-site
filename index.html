@@ -33,7 +33,6 @@
             background-size: 20px 20px;
         }
 
-        /* انیمیشن پس‌زمینه ترافیک شبکه */
         #network-bg {
             position: absolute;
             top: 0;
@@ -55,7 +54,6 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        /* افکت گلو (Glow) بالای کادر */
         .container::before {
             content: '';
             position: absolute;
@@ -105,7 +103,7 @@
             margin-right: auto;
         }
 
-        /* استایل‌های جدید بخش سرورها و پینگ زنده */
+        /* بخش سرورها و پینگ */
         .features {
             display: flex;
             justify-content: center;
@@ -157,11 +155,11 @@
             border: 1px solid #30363d;
         }
 
-        .ping-excellent { color: #39d353; text-shadow: 0 0 5px rgba(57, 211, 83, 0.4); } /* زیر ۱۰۰ */
-        .ping-good { color: #a6e22e; text-shadow: 0 0 5px rgba(166, 226, 46, 0.4); } /* ۱۰۰ تا ۱۵۰ */
-        .ping-fair { color: #e3b341; text-shadow: 0 0 5px rgba(227, 179, 65, 0.4); } /* ۱۵۰ تا ۲۰۰ */
+        .ping-excellent { color: #39d353; text-shadow: 0 0 5px rgba(57, 211, 83, 0.4); }
+        .ping-good { color: #a6e22e; text-shadow: 0 0 5px rgba(166, 226, 46, 0.4); }
+        .ping-fair { color: #e3b341; text-shadow: 0 0 5px rgba(227, 179, 65, 0.4); }
 
-        /* استایل دکمه‌ها */
+        /* دکمه‌ها */
         .btn {
             font-family: 'Vazirmatn', sans-serif;
             display: inline-block;
@@ -208,22 +206,56 @@
             flex-wrap: wrap;
         }
 
-        /* بخش وضعیت زنده سرورها */
+        /* ساختار جدید باکس وضعیت زنده و نمودار سیگنال */
         .status-panel {
             margin-top: 30px;
             border-top: 1px solid #30363d;
-            padding-top: 20px;
-            font-size: 12px;
-            color: var(--muted-text);
+            padding-top: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        /* بوم نقاشی سیگنال (Canvas) */
+        #cpr-canvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3; /* کم‌رنگ بودن نمودار برای عدم تداخل با متن */
+            /* افکت محو شدن لبه‌های نمودار */
+            -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+        }
+
+        /* کانتینر متن‌های وضعیت */
+        .status-content {
+            position: relative;
+            z-index: 2; /* قرار گرفتن روی نمودار */
             display: flex;
             justify-content: center;
             gap: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+            /* بک‌گراند تیره بسیار ملایم پشت متن‌ها برای خوانایی بیشتر */
+            background: rgba(13, 17, 23, 0.4); 
+            padding: 8px 15px;
+            border-radius: 8px;
         }
 
         .status-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #ffffff; /* پررنگ و سفید شدن متن‌ها */
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
         }
 
         .dot {
@@ -231,26 +263,25 @@
             height: 8px;
             border-radius: 50%;
             background-color: var(--success-color);
-            box-shadow: 0 0 5px var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0.6; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* برای موبایل */
         @media (max-width: 600px) {
             .container { padding: 30px 15px; border-radius: 0; border: none; width: 100%; }
             h1 { font-size: 22px; }
             p { font-size: 14px; }
             .features { gap: 10px; }
             .badge { min-width: 45%; padding: 10px; }
-            
             .btn-group { flex-direction: column; padding: 0 15px; }
             .btn { width: auto; text-align: center; }
+            .status-content { flex-direction: column; gap: 10px; align-items: center; }
         }
     </style>
 </head>
@@ -313,37 +344,94 @@
         </div>
 
         <div class="status-panel">
-            <div class="status-item"><div class="dot"></div> وضعیت شبکه: پایدار</div>
-            <div class="status-item"><div class="dot"></div> هسته مرکزی (DE): متصل</div>
-            <div class="status-item"><div class="dot"></div> لاین تانل (IR): فعال</div>
+            <canvas id="cpr-canvas"></canvas>
+            <div class="status-content">
+                <div class="status-item"><div class="dot"></div> وضعیت شبکه: پایدار</div>
+                <div class="status-item"><div class="dot"></div> هسته مرکزی (DE): متصل</div>
+                <div class="status-item"><div class="dot"></div> لاین تانل (IR): فعال</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // تابع تولید عدد تصادفی بین دو مقدار
+        // ۱. منطق تولید پینگ زنده
         function getRandomPing(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // تابع آپدیت پینگ‌ها
         function updatePings() {
-            // تانل‌ها: همیشه سبز و زیر ۱۰۰ (بین ۳۰ تا ۸۵)
             document.getElementById('ping-ir').innerText = getRandomPing(30, 85);
             document.getElementById('ping-sp2').innerText = getRandomPing(25, 75);
-            
-            // آلمان: سبز روشن/زرد مایل به سبز بین ۱۰۰ تا ۱۵۰ (بین ۱۰۵ تا ۱۴۵)
             document.getElementById('ping-de').innerText = getRandomPing(105, 145);
-            
-            // آمریکا و ترکیه: زرد بین ۱۵۰ تا ۲۰۰ (بین ۱۵۵ تا ۱۹۵)
             document.getElementById('ping-us').innerText = getRandomPing(155, 195);
             document.getElementById('ping-tr').innerText = getRandomPing(151, 185);
         }
 
-        // اجرای اولیه
         updatePings();
-
-        // تکرار فرایند هر 1.5 ثانیه برای ایجاد حس زنده بودن شبکه
         setInterval(updatePings, 1500);
+
+        // ۲. منطق نمودار سیگنال شبکه (Network Heartbeat)
+        const canvas = document.getElementById('cpr-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let points = [];
+        let tick = 0;
+
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            width = canvas.width;
+            height = canvas.height;
+            // پر کردن آرایه اولیه برای نقاط نمودار
+            points = new Array(Math.floor(width / 4)).fill(height / 1.5);
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // اطمینان از مقداردهی صحیح ابعاد پس از لود شدن کامل CSS
+        setTimeout(resizeCanvas, 100);
+
+        function drawHeartbeat() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.beginPath();
+            ctx.moveTo(0, points[0]);
+            
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(i * 4, points[i]); // فاصله بین نقاط روی محور X
+            }
+            
+            // استایل خط سیگنال
+            ctx.strokeStyle = '#58a6ff'; // رنگ آبی سایبری
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // افکت درخشش (Glow)
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#58a6ff';
+
+            points.shift(); // حذف نقطه قدیمی از سمت چپ
+            
+            // تولید سیگنال جدید
+            tick++;
+            let baseline = height / 1.5;
+            let newPoint = baseline;
+            
+            // ایجاد پالس‌های ناگهانی (مشابه ضربان قلب/ترافیک شبکه)
+            if (tick % 80 > 70) {
+                newPoint = baseline + (Math.random() - 0.5) * (height * 0.9);
+            } else {
+                // نویزِ ریزِ خط پایه
+                newPoint = baseline + (Math.random() - 0.5) * 4;
+            }
+            
+            points.push(newPoint); // اضافه کردن نقطه جدید به سمت راست
+
+            requestAnimationFrame(drawHeartbeat);
+        }
+
+        setTimeout(() => {
+            drawHeartbeat();
+        }, 150);
     </script>
 </body>
 </html>
