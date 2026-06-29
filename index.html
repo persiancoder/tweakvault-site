@@ -136,41 +136,44 @@
         }
 
         .btn {
-    font-family: 'Vazirmatn', sans-serif;
-    display: inline-block;
-    background-color: var(--success-color);
-    color: #ffffff;
-    text-decoration: none;
-    padding: 16px 35px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 17px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4);
-    position: relative;
-    overflow: hidden;
-}
+            font-family: 'Vazirmatn', sans-serif;
+            display: inline-block;
+            background-color: #c5a059; /* رنگ طلایی هماهنگ با لوگو */
+            color: #000000; /* رنگ متن مشکی برای خوانایی و جذابیت بالا روی طلایی */
+            text-decoration: none;
+            padding: 16px 35px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 17px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4); /* سایه طلایی */
+            position: relative;
+            overflow: hidden;
+        }
 
-        /* انیمیشن تابش دکمه */
+        /* طراحی هاله نوری (Shine Effect) */
         .btn::after {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 100%;
+            left: -150%;
+            width: 50%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+            transform: skewX(-25deg); /* کج کردن هاله نوری برای حالت داینامیک‌تر */
+            transition: left 0.6s ease-in-out;
         }
 
+        /* تغییرات در زمان قرار گرفتن موس روی دکمه (Hover) */
         .btn:hover {
-            background-color: #2ea44f;
-            box-shadow: 0 6px 20px rgba(35, 134, 54, 0.6);
+            background-color: #d6b36e; /* روشن‌تر شدن رنگ طلایی */
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.7); /* پررنگ‌تر شدن سایه طلایی */
             transform: translateY(-2px);
         }
 
+        /* حرکت هاله نوری هنگام هاور */
         .btn:hover::after {
-            left: 100%;
+            left: 150%;
         }
 
         /* بخش وضعیت زنده سرورها (شبیه‌سازی) */
