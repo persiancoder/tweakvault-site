@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* متغیرهای رنگی پیش‌فرض (تم تاریک) */
         :root {
             --bg-color: #0d1117;
             --main-accent: #58a6ff;
@@ -18,53 +19,72 @@
             --text-color: #c9d1d9;
             --muted-text: #8b949e;
             --box-bg: rgba(13, 17, 23, 0.85);
+            --border-color: rgba(48, 54, 61, 0.8);
+            --badge-bg: #161b22;
+            --ping-bg: rgba(0, 0, 0, 0.5);
+            --news-bg: rgba(0, 0, 0, 0.4);
+        }
+
+        /* متغیرهای رنگی (تم روشن) */
+        body.light-mode {
+            --bg-color: #f0f4f8;
+            --text-color: #1a202c;
+            --muted-text: #4a5568;
+            --box-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(203, 213, 225, 0.8);
+            --badge-bg: #f8fafc;
+            --ping-bg: rgba(226, 232, 240, 0.7);
+            --news-bg: rgba(255, 255, 255, 0.6);
+            --main-glow: rgba(88, 166, 255, 0.2);
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Vazirmatn', Tahoma, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden;
+            background-image: radial-gradient(circle, rgba(128, 128, 128, 0.1) 1.5px, transparent 1.5px);
             background-size: 20px 20px;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
+
+        /* دکمه تغییر تم (Day/Night Toggle) */
+        .theme-toggle {
+            position: fixed;
+            bottom: 25px; left: 25px;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: var(--box-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 22px; cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .theme-toggle:hover { transform: scale(1.1) rotate(15deg); border-color: var(--main-accent); }
 
         #network-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.15;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; transition: opacity 0.4s ease;
         }
+        body.light-mode #network-bg { filter: invert(1); opacity: 0.05; }
 
-        /* هاله نور پس‌زمینه کانتینر اصلی */
         .glow-bg {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%; height: 80%;
-            background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
-            z-index: 0;
-            pointer-events: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: 80%; background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+            z-index: 0; pointer-events: none;
         }
 
         .container {
-            max-width: 800px;
-            width: 95%;
-            margin: 40px 0;
-            padding: 35px 30px;
-            background: var(--box-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(48, 54, 61, 0.8);
-            border-radius: 16px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(88, 166, 255, 0.05);
+            max-width: 800px; width: 95%; margin: 40px 0; padding: 35px 30px;
+            background: var(--box-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 16px;
+            text-align: center; position: relative; z-index: 1;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(88, 166, 255, 0.02);
+            transition: all 0.4s ease;
         }
 
         .container::before {
@@ -76,13 +96,13 @@
         /* آمار بازدید */
         .stats-bar {
             display: flex; justify-content: center; gap: 45px; margin-bottom: 25px;
-            padding-bottom: 20px; border-bottom: 1px dashed #30363d;
+            padding-bottom: 20px; border-bottom: 1px dashed var(--border-color);
         }
         .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .stat-label { font-size: 11px; color: var(--muted-text); text-transform: uppercase; letter-spacing: 1px; }
         .stat-value {
             font-family: monospace, Tahoma, sans-serif; font-size: 22px; font-weight: bold;
-            color: var(--main-accent); text-shadow: 0 0 15px rgba(88, 166, 255, 0.6); direction: ltr;
+            color: var(--main-accent); text-shadow: 0 0 15px var(--main-glow); direction: ltr;
         }
 
         .logo-box {
@@ -95,86 +115,67 @@
         h1 { color: var(--main-accent); font-size: 24px; margin-bottom: 15px; text-shadow: 0 0 12px var(--main-glow); }
         p { font-size: 15px; line-height: 1.8; color: var(--muted-text); margin-bottom: 30px; }
 
-        /* ------------------------------------- */
         /* بخش اخبار (Live Bulletin) */
-        /* ------------------------------------- */
         .news-container {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            margin-bottom: 35px;
-            padding: 15px;
-            text-align: right;
-            box-shadow: inset 0 0 15px rgba(88, 166, 255, 0.05);
-            max-height: 180px;
-            overflow-y: auto;
-            position: relative;
+            background: var(--news-bg); border: 1px solid var(--border-color);
+            border-radius: 10px; margin-bottom: 35px; padding: 15px; text-align: right;
+            max-height: 200px; overflow-y: auto; position: relative; transition: all 0.4s ease;
         }
-        
-        /* اسکرول بار اختصاصی برای اخبار */
         .news-container::-webkit-scrollbar { width: 6px; }
         .news-container::-webkit-scrollbar-track { background: transparent; }
-        .news-container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        .news-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
         .news-container::-webkit-scrollbar-thumb:hover { background: var(--main-accent); }
 
         .news-header {
             font-size: 14px; font-weight: bold; color: var(--main-accent);
             margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid #30363d; padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
         }
-        .news-header::before {
-            content: '⚡'; font-size: 16px; animation: blink 1.5s infinite;
-        }
-        
+        .news-header::before { content: '⚡'; font-size: 16px; animation: blink 1.5s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
 
         .news-item {
             border-right: 2px solid var(--main-accent);
-            padding-right: 12px; margin-bottom: 15px;
-            transition: all 0.3s ease;
+            padding-right: 12px; margin-bottom: 15px; transition: all 0.3s ease;
         }
         .news-item:hover { background: rgba(88, 166, 255, 0.05); border-right-color: #fff; }
+        body.light-mode .news-item:hover { border-right-color: #000; }
         .news-item:last-child { margin-bottom: 0; }
         
         .news-date {
             font-size: 11px; color: var(--muted-text); font-family: monospace, sans-serif;
             margin-bottom: 5px; display: block; direction: ltr; text-align: right;
         }
-        .news-text { font-size: 13.5px; color: #e6edf3; line-height: 1.6; }
+        .news-text { font-size: 13.5px; color: var(--text-color); line-height: 1.6; }
 
-        /* ------------------------------------- */
-        /* بخش سرورها و اینباندها */
-        /* ------------------------------------- */
+        /* بخش سرورها */
         .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px; margin-bottom: 40px;
         }
         .badge {
-            background-color: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 12px;
+            background-color: var(--badge-bg); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; gap: 12px;
             transition: all 0.3s ease; position: relative; overflow: hidden;
         }
-        .badge:hover {
-            border-color: var(--main-accent); box-shadow: 0 5px 15px rgba(88, 166, 255, 0.15);
-            transform: translateY(-2px);
-        }
-        .badge-title { font-size: 13.5px; font-weight: bold; text-align: center; line-height: 1.4; color: #c9d1d9;}
+        .badge:hover { border-color: var(--main-accent); box-shadow: 0 5px 15px var(--main-glow); transform: translateY(-2px); }
+        .badge-title { font-size: 13px; font-weight: bold; text-align: center; line-height: 1.4; color: var(--text-color);}
         
         .ping-box {
             font-size: 12px; font-family: monospace, Tahoma, sans-serif; font-weight: bold; direction: ltr;
-            background: rgba(0, 0, 0, 0.5); padding: 5px 15px; border-radius: 6px; width: 85%;
-            text-align: center; border: 1px solid #30363d; letter-spacing: 1px;
+            background: var(--ping-bg); padding: 5px 15px; border-radius: 6px; width: 85%;
+            text-align: center; border: 1px solid var(--border-color); letter-spacing: 1px; transition: all 0.3s ease;
         }
 
-        .ping-excellent { color: #39d353; text-shadow: 0 0 8px rgba(57, 211, 83, 0.5); border-color: rgba(57, 211, 83, 0.3); }
-        .ping-good { color: #a6e22e; }
-        .ping-fair { color: #e3b341; }
+        .ping-excellent { color: #39d353; text-shadow: 0 0 8px rgba(57, 211, 83, 0.4); border-color: rgba(57, 211, 83, 0.3); }
+        .ping-good { color: #85d614; text-shadow: 0 0 5px rgba(166, 226, 46, 0.2); }
+        .ping-fair { color: #e3b341; text-shadow: 0 0 5px rgba(227, 179, 65, 0.2); }
 
-        /* استایل اختصاصی اینباندهای تبلیغاتی */
-        .badge-ad {
-            background: rgba(227, 179, 65, 0.03); border-color: rgba(227, 179, 65, 0.3);
-        }
+        body.light-mode .ping-excellent { color: #1a7f37; text-shadow: none; border-color: #1a7f37; }
+        body.light-mode .ping-good { color: #619a0a; text-shadow: none; }
+        body.light-mode .ping-fair { color: #9a6700; text-shadow: none; }
+
+        .badge-ad { background: rgba(227, 179, 65, 0.05); border-color: rgba(227, 179, 65, 0.3); }
         .badge-ad .badge-title { color: var(--warning-color); }
         .badge-ad .ping-box {
             color: var(--muted-text); background: transparent; border: 1px dashed rgba(227, 179, 65, 0.5);
@@ -199,7 +200,7 @@
 
         /* باکس وضعیت زنده و نمودار سیگنال */
         .status-panel {
-            margin-top: 20px; border-top: 1px solid #30363d; padding-top: 25px; position: relative;
+            margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 25px; position: relative;
             overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 50px;
         }
         #cpr-canvas {
@@ -209,23 +210,25 @@
         }
         .status-content {
             position: relative; z-index: 2; display: flex; justify-content: center; gap: 20px; width: 100%;
-            flex-wrap: wrap; background: rgba(13, 17, 23, 0.5); padding: 10px 20px; border-radius: 8px;
-            border: 1px solid rgba(48, 54, 61, 0.5);
+            flex-wrap: wrap; background: var(--box-bg); padding: 10px 20px; border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
-        .status-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; color: #ffffff; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+        .status-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; color: var(--text-color); }
         .dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); animation: pulse 2s infinite; }
 
         @media (max-width: 600px) {
             .container { padding: 25px 15px; margin: 20px 0; width: 100%; border-radius: 0; border-left: none; border-right: none;}
-            .stats-bar { gap: 20px; }
-            .features { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: column; padding: 0 10px; }
-            .btn { width: 100%; }
+            .stats-bar { gap: 20px; } .features { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; padding: 0 10px; } .btn { width: auto; }
             .status-content { flex-direction: column; gap: 12px; align-items: center; }
+            .theme-toggle { bottom: 15px; left: 15px; width: 45px; height: 45px; font-size: 18px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- دکمه تغییر تم -->
+    <button class="theme-toggle" id="theme-btn" title="تغییر تم تاریک/روشن">🌓</button>
 
     <svg id="network-bg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -247,7 +250,6 @@
     <div class="glow-bg"></div>
 
     <div class="container">
-        
         <!-- هدر آمار بازدید -->
         <div class="stats-bar">
             <div class="stat-item">
@@ -264,56 +266,21 @@
             </div>
         </div>
 
-        <div class="logo-box">
-            <img src="logo.jpg" alt="TweakVault Logo" class="logo">
-        </div>
+        <div class="logo-box"><img src="logo.jpg" alt="TweakVault Logo" class="logo"></div>
         
         <h1>TweakVault - پایگاه زیرساخت و تونلینگ هوشمند</h1>
         
-        <!-- بولتن اخبار زنده -->
+        <!-- بولتن اخبار زنده (پویا) -->
         <div class="news-container">
             <div class="news-header">بولتن اطلاعیه‌های زنده شبکه</div>
             <div id="news-content">
-                <!-- اخبار توسط جاوااسکریپت در اینجا تولید می‌شوند -->
+                <!-- اخبار توسط جاوااسکریپت و متغیر appData رندر می‌شوند -->
             </div>
         </div>
 
-        <!-- سرورها و اینباندها -->
-        <div class="features">
-            <div class="badge">
-                <div class="badge-title">🚀 پرسرعتِ دائمی (اینستاگرام / آپلود)</div>
-                <div class="ping-box ping-excellent"><span id="ping-fast">34</span> ms</div>
-            </div>
-            <div class="badge">
-                <div class="badge-title">فوق‌العاده پایدار 🐎 (آپدیت / یوتیوب)</div>
-                <div class="ping-box ping-excellent"><span id="ping-stable">38</span> ms</div>
-            </div>
-            <div class="badge">
-                <div class="badge-title">🇩🇪 German (DE)</div>
-                <div class="ping-box ping-good"><span id="ping-de">118</span> ms</div>
-            </div>
-            <div class="badge">
-                <div class="badge-title">🇹🇷 Turkey (TR)</div>
-                <div class="ping-box ping-fair"><span id="ping-tr">152</span> ms</div>
-            </div>
-            <div class="badge">
-                <div class="badge-title">🇺🇸 USA (US)</div>
-                <div class="ping-box ping-fair"><span id="ping-us">165</span> ms</div>
-            </div>
-            <div class="badge">
-                <div class="badge-title">🇸🇪 سوئد (ویژه ایرانسل و همراه اول)</div>
-                <div class="ping-box ping-good"><span id="ping-se">125</span> ms</div>
-            </div>
-            
-            <!-- اینباندهای تبلیغاتی -->
-            <div class="badge badge-ad">
-                <div class="badge-title">⚠️ هشدار زیرساخت | ملی شدن نت = قطعی کامل اتصالات</div>
-                <div class="ping-box">پینگ ندارد (تبلیغاتی)</div>
-            </div>
-            <div class="badge badge-ad">
-                <div class="badge-title">💎 عضویت و پیگیری شبکه -> @TweakVaultVPN</div>
-                <div class="ping-box">پینگ ندارد (تبلیغاتی)</div>
-            </div>
+        <!-- سرورها و اینباندها (پویا) -->
+        <div class="features" id="servers-container">
+            <!-- سرورها توسط جاوااسکریپت و متغیر appData رندر می‌شوند -->
         </div>
 
         <!-- گروه دکمه‌ها -->
@@ -334,39 +301,112 @@
     </div>
 
     <script>
-        // --- 0. سیستم اخبار زنده (Live Bulletin) ---
-        // ایرج جان، هر خبری خواستی اضافه کنی، فقط متن رو داخل کوتیشن در آرایه زیر بنویس. 
-        // کد به طور خودکار تاریخ و ساعت رو برای هر کدوم محاسبه و درج میکنه.
-        const newsData = [
-            "بات هوشمند ثبت سفارشات راه اندازی شد و از این پس میتوانید جهت تمدید , خرید یا مشاهده باقی مانده حجمی از این بات استفاده کنید.",
-            "فیلتراسیون هوشمند باعث اختلال منطقه ای و فیلتر سرور های دیتاسنتر حتی ایران شده است!",
-            "سرور (🇸🇪 سوئد (ویژه ایرانسل و همراه اول) از مدار خارج شد.) به سرویس های مستقیم اضافه شد."
-        ];
+        // ============================================================================
+        // 0. پایگاه داده شبیه‌سازی شده (آماده برای آپدیت توسط بات تلگرام در آینده)
+        // این ساختار به شما اجازه می‌دهد فقط این قسمت را تغییر دهید و کل سایت آپدیت شود.
+        // ============================================================================
+        const appData = {
+            news: [
+                { time: "2026-07-14T11:20:00", text: "بات هوشمند ثبت سفارشات راه اندازی شد و از این پس میتوانید جهت تمدید ، خرید یا مشاهده باقی مانده حجمی از این بات استفاده کنید." },
+                { time: "2026-07-14T03:18:00", text: "فیلتراسیون هوشمند باعث اختلال منطقه ای و فیلتر سرور های دیتاسنتر حتی ایران شده است!" },
+                { time: "2026-07-13T23:18:00", text: "سرور (🇸🇪 سوئد (ویژه ایرانسل و همراه اول) از مدار خارج شد.) به سرویس های مستقیم اضافه شد." }
+            ],
+            servers: [
+                // سرورهای عملیاتی (پینگ رندوم بین min و max)
+                { id: "s1", name: "🚀 پرسرعتِ دائمی (اینستاگرام / آپلود)", minPing: 25, maxPing: 45 },
+                { id: "s2", name: "فوق‌العاده پایدار 🐎 (آپدیت / یوتیوب)", minPing: 30, maxPing: 48 },
+                { id: "s3", name: "🇩🇪 German (DE)", minPing: 105, maxPing: 145 },
+                { id: "s4", name: "🇹🇷 Turkey (TR)", minPing: 145, maxPing: 185 },
+                { id: "s5", name: "🇺🇸 USA (US)", minPing: 155, maxPing: 195 },
+                { id: "s6", name: "🇸🇪 سوئد (ویژه ایرانسل و همراه اول)", minPing: 110, maxPing: 150 }
+            ],
+            ads: [
+                // سرورهای تبلیغاتی (بدون پینگ)
+                { name: "⚠️ هشدار زیرساخت | ملی شدن نت = قطعی کامل اتصالات", label: "پینگ ندارد (تبلیغاتی)" },
+                { name: "💎 عضویت و پیگیری شبکه -> @TweakVaultVPN", label: "پینگ ندارد (تبلیغاتی)" }
+            ]
+        };
 
-        const newsContainer = document.getElementById('news-content');
-        let htmlContent = '';
+        // ============================================================================
+        // 1. سیستم رندرینگ داینامیک اطلاعات
+        // ============================================================================
         
-        newsData.forEach((newsText, index) => {
-            // ساخت یک تاریخ فرضی و نزدیک به زمان حال برای هر خبر تا ظاهر طبیعی داشته باشد
-            let d = new Date();
-            // هر خبر قدیمی‌تر، چند ساعت به عقب برمی‌گردد
-            d.setHours(d.getHours() - (index * 6) - (Math.random() * 2)); 
+        // تولید رنگ پینگ بر اساس مقدار
+        function getPingClass(pingValue) {
+            if (pingValue <= 80) return "ping-excellent";
+            if (pingValue <= 150) return "ping-good";
+            return "ping-fair";
+        }
+
+        // رندر اخبار با تاریخ موثق و تبدیل به شمسی
+        function renderNews() {
+            const container = document.getElementById('news-content');
+            let html = '';
+            appData.news.forEach(item => {
+                let d = new Date(item.time); // خواندن تاریخ استاندارد
+                // تبدیل به شمسی
+                let dateStr = d.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
+                let timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                html += `
+                    <div class="news-item">
+                        <span class="news-date">${timeStr} | ${dateStr} 🗓</span>
+                        <div class="news-text">${item.text}</div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // رندر سرورها
+        function renderServers() {
+            const container = document.getElementById('servers-container');
+            let html = '';
             
-            // فرمت‌بندی تاریخ و زمان
-            let dateStr = d.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
-            let timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+            // رندر سرورهای عملیاتی
+            appData.servers.forEach(server => {
+                html += `
+                    <div class="badge">
+                        <div class="badge-title">${server.name}</div>
+                        <div class="ping-box" id="ping-${server.id}">-- ms</div>
+                    </div>`;
+            });
 
-            htmlContent += `
-                <div class="news-item">
-                    <span class="news-date">${timeStr} | ${dateStr} 🗓</span>
-                    <div class="news-text">${newsText}</div>
-                </div>
-            `;
-        });
-        newsContainer.innerHTML = htmlContent;
+            // رندر سرورهای تبلیغاتی
+            appData.ads.forEach(ad => {
+                html += `
+                    <div class="badge badge-ad">
+                        <div class="badge-title">${ad.name}</div>
+                        <div class="ping-box">${ad.label}</div>
+                    </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
 
+        renderNews();
+        renderServers();
 
-        // --- 1. سیستم آمار بازدید (Time-Based & Synchronized) ---
+        // ============================================================================
+        // 2. منطق تولید پینگ زنده
+        // ============================================================================
+        function getRandomPing(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function updatePings() {
+            appData.servers.forEach(server => {
+                let el = document.getElementById(`ping-${server.id}`);
+                if (el) {
+                    let ping = getRandomPing(server.minPing, server.maxPing);
+                    el.innerText = `${ping} ms`;
+                    // آپدیت کلاس رنگ پینگ
+                    el.className = `ping-box ${getPingClass(ping)}`;
+                }
+            });
+        }
+        updatePings();
+        setInterval(updatePings, 1500);
+
+        // ============================================================================
+        // 3. سیستم آمار بازدید (Time-Based)
+        // ============================================================================
         function initStats() {
             const launchDate = new Date("2026-06-25T00:00:00").getTime();
             const now = new Date();
@@ -387,46 +427,44 @@
             let lastVisitDate = localStorage.getItem('tv_last_visit_date');
             let todayStr = now.toISOString().split('T')[0];
             
-            if (lastVisitDate !== todayStr) {
-                localRefreshes = 1; 
-            } else {
-                localRefreshes += 1; 
-            }
+            if (lastVisitDate !== todayStr) { localRefreshes = 1; } 
+            else { localRefreshes += 1; }
             
             localStorage.setItem('tv_local_refreshes', localRefreshes);
             localStorage.setItem('tv_last_visit_date', todayStr);
 
-            const finalTotal = baseTotal + localRefreshes;
-            const finalMonthly = baseMonthly + localRefreshes;
-            const finalDaily = baseDaily + localRefreshes;
-
-            document.getElementById('stat-total').innerText = finalTotal.toLocaleString('en-US');
-            document.getElementById('stat-monthly').innerText = finalMonthly.toLocaleString('en-US');
-            document.getElementById('stat-daily').innerText = finalDaily.toLocaleString('en-US');
+            document.getElementById('stat-total').innerText = (baseTotal + localRefreshes).toLocaleString('en-US');
+            document.getElementById('stat-monthly').innerText = (baseMonthly + localRefreshes).toLocaleString('en-US');
+            document.getElementById('stat-daily').innerText = (baseDaily + localRefreshes).toLocaleString('en-US');
         }
         initStats();
 
-
-        // --- 2. منطق تولید پینگ زنده ---
-        function getRandomPing(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-        function updatePings() {
-            // سرورهای ویژه (کمترین پینگ)
-            document.getElementById('ping-fast').innerText = getRandomPing(25, 45);
-            document.getElementById('ping-stable').innerText = getRandomPing(30, 48);
-            
-            // سایر سرورها
-            document.getElementById('ping-de').innerText = getRandomPing(105, 145);
-            document.getElementById('ping-se').innerText = getRandomPing(110, 150);
-            document.getElementById('ping-tr').innerText = getRandomPing(145, 185);
-            document.getElementById('ping-us').innerText = getRandomPing(155, 195);
+        // ============================================================================
+        // 4. دکمه تغییر تم (Dark/Light Mode)
+        // ============================================================================
+        const themeBtn = document.getElementById('theme-btn');
+        const body = document.body;
+        
+        // بررسی انتخاب قبلی کاربر
+        if (localStorage.getItem('tv_theme') === 'light') {
+            body.classList.add('light-mode');
+            themeBtn.innerText = '🌙';
         }
 
-        updatePings();
-        setInterval(updatePings, 1500);
+        themeBtn.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('tv_theme', 'light');
+                themeBtn.innerText = '🌙';
+            } else {
+                localStorage.setItem('tv_theme', 'dark');
+                themeBtn.innerText = '🌓';
+            }
+        });
 
-
-        // --- 3. منطق نمودار سیگنال شبکه (Network Heartbeat) ---
+        // ============================================================================
+        // 5. منطق نمودار سیگنال شبکه (Network Heartbeat)
+        // ============================================================================
         const canvas = document.getElementById('cpr-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -440,7 +478,6 @@
             height = canvas.height;
             points = new Array(Math.floor(width / 4)).fill(height / 1.5);
         }
-        
         window.addEventListener('resize', resizeCanvas);
         setTimeout(resizeCanvas, 100);
 
@@ -448,35 +485,22 @@
             ctx.clearRect(0, 0, width, height);
             ctx.beginPath();
             ctx.moveTo(0, points[0]);
+            for (let i = 1; i < points.length; i++) { ctx.lineTo(i * 4, points[i]); }
             
-            for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(i * 4, points[i]);
-            }
-            
-            ctx.strokeStyle = '#58a6ff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#58a6ff';
+            // رنگ آبی در هر دو تم
+            ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.shadowBlur = 8; ctx.shadowColor = '#58a6ff';
 
-            points.shift(); 
-            
-            tick++;
+            points.shift(); tick++;
             let baseline = height / 1.5;
             let newPoint = baseline;
             
-            // تولید سیگنال پالس
-            if (tick % 80 > 70) {
-                newPoint = baseline + (Math.random() - 0.5) * (height * 0.9);
-            } else {
-                newPoint = baseline + (Math.random() - 0.5) * 4;
-            }
+            if (tick % 80 > 70) { newPoint = baseline + (Math.random() - 0.5) * (height * 0.9); } 
+            else { newPoint = baseline + (Math.random() - 0.5) * 4; }
             
             points.push(newPoint); 
             requestAnimationFrame(drawHeartbeat);
         }
-
         setTimeout(() => { drawHeartbeat(); }, 150);
     </script>
 </body>
