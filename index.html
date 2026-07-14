@@ -156,7 +156,7 @@
     </div>
 
     <script>
-        // ❌ در این خط، به جای عبارت yourname.workers.dev آدرس دقیق ورکر خودت را وارد کن و حتماً با /api/data تمام شود ❌
+        // آدرس API به صورت صحیح ست شده است
         const API_URL = "https://api.tweakvault.ir/api/data";
 
         let appData = { news: [], servers: [], ads: [] };
@@ -201,19 +201,21 @@
 
         async function fetchLiveAppData() {
             try {
-                // ترفند Cache-Buster برای جلوگیری از گیر کردن اطلاعات قدیمی در مرورگر
+                // دریافت اطلاعات تنها با اضافه کردن Cache-Buster به انتهای آدرس
+                // هدرهای مشکل‌ساز CORS حذف شدند
                 const fetchUrl = API_URL + "?t=" + new Date().getTime();
-                const response = await fetch(fetchUrl, {
-                    method: 'GET',
-                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0' }
-                });
+                const response = await fetch(fetchUrl);
                 
                 if (response.ok) {
                     appData = await response.json();
-                    renderNews(); renderServers();
+                    renderNews(); 
+                    renderServers();
+                } else {
+                    console.log("پاسخ سرور نامعتبر بود. کد:", response.status);
                 }
             } catch (error) {
-                console.log("خطا در دریافت دیتا");
+                console.log("خطا در ارتباط با سرور دیتابیس:", error);
+                document.getElementById('news-content').innerHTML = `<div class="news-item"><div class="news-text" style="color: var(--warning-color)">خطا در دریافت اطلاعات شبکه. لطفاً رفرش کنید.</div></div>`;
             }
         }
         
