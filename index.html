@@ -270,17 +270,20 @@
         
         <h1>TweakVault - پایگاه زیرساخت و تونلینگ هوشمند</h1>
         
-        <!-- بولتن اخبار زنده (پویا) -->
+        <!-- بولتن اخبار زنده -->
         <div class="news-container">
             <div class="news-header">بولتن اطلاعیه‌های زنده شبکه</div>
             <div id="news-content">
-                <!-- اخبار توسط جاوااسکریپت و متغیر appData رندر می‌شوند -->
+                <div class="news-item">
+                    <span class="news-date">در حال همگام‌سازی با سرور... ⏳</span>
+                    <div class="news-text" style="color: var(--muted-text)">لطفاً چند لحظه منتظر بمانید.</div>
+                </div>
             </div>
         </div>
 
-        <!-- سرورها و اینباندها (پویا) -->
+        <!-- سرورها و اینباندها -->
         <div class="features" id="servers-container">
-            <!-- سرورها توسط جاوااسکریپت و متغیر appData رندر می‌شوند -->
+            <!-- در زمان لود اولیه خالی است تا از API پر شود -->
         </div>
 
         <!-- گروه دکمه‌ها -->
@@ -302,17 +305,17 @@
 
     <script>
         // ============================================================================
-        // 0. پایگاه داده شبیه‌سازی شده (آماده برای آپدیت توسط بات تلگرام در آینده)
-        // این ساختار به شما اجازه می‌دهد فقط این قسمت را تغییر دهید و کل سایت آپدیت شود.
+        // 0. ارتباط با دیتابیس ربات تلگرامی
         // ============================================================================
-        const appData = {
-            news: [
-                { time: "2026-07-14T11:20:00", text: "بات هوشمند ثبت سفارشات راه اندازی شد و از این پس میتوانید جهت تمدید ، خرید یا مشاهده باقی مانده حجمی از این بات استفاده کنید." },
-                { time: "2026-07-14T03:18:00", text: "فیلتراسیون هوشمند باعث اختلال منطقه ای و فیلتر سرور های دیتاسنتر حتی ایران شده است!" },
-                { time: "2026-07-13T23:18:00", text: "سرور (🇸🇪 سوئد (ویژه ایرانسل و همراه اول) از مدار خارج شد.) به سرویس های مستقیم اضافه شد." }
-            ],
+        
+        // ❌ حتماً دامنه ورکر خودت را به جای عبارت زیر جایگزین کن ❌
+        // مثال: "https://tv-admin-bot.mazandaransat.workers.dev/api/data"
+        const API_URL = "https://آدرس-ورکر-شما/api/data";
+
+        // دیتای پیش‌فرض در صورت آفلاین بودن موقتِ API
+        let appData = {
+            news: [],
             servers: [
-                // سرورهای عملیاتی (پینگ رندوم بین min و max)
                 { id: "s1", name: "🚀 پرسرعتِ دائمی (اینستاگرام / آپلود)", minPing: 25, maxPing: 45 },
                 { id: "s2", name: "فوق‌العاده پایدار 🐎 (آپدیت / یوتیوب)", minPing: 30, maxPing: 48 },
                 { id: "s3", name: "🇩🇪 German (DE)", minPing: 105, maxPing: 145 },
@@ -321,7 +324,6 @@
                 { id: "s6", name: "🇸🇪 سوئد (ویژه ایرانسل و همراه اول)", minPing: 110, maxPing: 150 }
             ],
             ads: [
-                // سرورهای تبلیغاتی (بدون پینگ)
                 { name: "⚠️ هشدار زیرساخت | ملی شدن نت = قطعی کامل اتصالات", label: "پینگ ندارد (تبلیغاتی)" },
                 { name: "💎 عضویت و پیگیری شبکه -> @TweakVaultVPN", label: "پینگ ندارد (تبلیغاتی)" }
             ]
@@ -331,20 +333,21 @@
         // 1. سیستم رندرینگ داینامیک اطلاعات
         // ============================================================================
         
-        // تولید رنگ پینگ بر اساس مقدار
         function getPingClass(pingValue) {
             if (pingValue <= 80) return "ping-excellent";
             if (pingValue <= 150) return "ping-good";
             return "ping-fair";
         }
 
-        // رندر اخبار با تاریخ موثق و تبدیل به شمسی
         function renderNews() {
             const container = document.getElementById('news-content');
+            if (!appData.news || appData.news.length === 0) {
+                container.innerHTML = `<div class="news-item"><div class="news-text" style="color: var(--muted-text)">در حال حاضر اطلاعیه‌ای ثبت نشده است.</div></div>`;
+                return;
+            }
             let html = '';
             appData.news.forEach(item => {
-                let d = new Date(item.time); // خواندن تاریخ استاندارد
-                // تبدیل به شمسی
+                let d = new Date(item.time);
                 let dateStr = d.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
                 let timeStr = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
                 html += `
@@ -356,12 +359,9 @@
             container.innerHTML = html;
         }
 
-        // رندر سرورها
         function renderServers() {
             const container = document.getElementById('servers-container');
             let html = '';
-            
-            // رندر سرورهای عملیاتی
             appData.servers.forEach(server => {
                 html += `
                     <div class="badge">
@@ -369,8 +369,6 @@
                         <div class="ping-box" id="ping-${server.id}">-- ms</div>
                     </div>`;
             });
-
-            // رندر سرورهای تبلیغاتی
             appData.ads.forEach(ad => {
                 html += `
                     <div class="badge badge-ad">
@@ -378,12 +376,26 @@
                         <div class="ping-box">${ad.label}</div>
                     </div>`;
             });
-            
             container.innerHTML = html;
         }
 
-        renderNews();
-        renderServers();
+        // دریافت اطلاعات از ربات تلگرام
+        async function fetchLiveAppData() {
+            renderServers(); // رندر با اطلاعات پیش‌فرض
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    appData = await response.json();
+                    renderNews();
+                    renderServers();
+                }
+            } catch (error) {
+                console.log("استفاده از دیتای آفلاین به دلیل عدم دسترسی به API");
+                renderNews();
+            }
+        }
+        
+        fetchLiveAppData();
 
         // ============================================================================
         // 2. منطق تولید پینگ زنده
@@ -396,12 +408,10 @@
                 if (el) {
                     let ping = getRandomPing(server.minPing, server.maxPing);
                     el.innerText = `${ping} ms`;
-                    // آپدیت کلاس رنگ پینگ
                     el.className = `ping-box ${getPingClass(ping)}`;
                 }
             });
         }
-        updatePings();
         setInterval(updatePings, 1500);
 
         // ============================================================================
@@ -445,7 +455,6 @@
         const themeBtn = document.getElementById('theme-btn');
         const body = document.body;
         
-        // بررسی انتخاب قبلی کاربر
         if (localStorage.getItem('tv_theme') === 'light') {
             body.classList.add('light-mode');
             themeBtn.innerText = '🌙';
@@ -487,7 +496,6 @@
             ctx.moveTo(0, points[0]);
             for (let i = 1; i < points.length; i++) { ctx.lineTo(i * 4, points[i]); }
             
-            // رنگ آبی در هر دو تم
             ctx.strokeStyle = '#58a6ff'; ctx.lineWidth = 1.5; ctx.stroke();
             ctx.shadowBlur = 8; ctx.shadowColor = '#58a6ff';
 
